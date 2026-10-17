@@ -1,0 +1,110 @@
+{
+  "written": "2026-10-16T17:19:44",
+  "sha256": "22d4360dfd25db3a1434ed38e9609030a168b1b5bfaabeddba01dd523f2204a1",
+  "body": {
+    "version": 3,
+    "selection_period": [
+      "2008-01-02",
+      "2015-12-31"
+    ],
+    "holdout_start": "2016-01-01",
+    "universe": "tradable",
+    "symbols": [
+      "DIA",
+      "GLD",
+      "IEF",
+      "IWM",
+      "QQQ",
+      "SHY",
+      "SLV",
+      "SPY",
+      "TLT",
+      "USO"
+    ],
+    "D_star": {
+      "config": "b27fcc97281c",
+      "config_label": "candle+gap/close/buf0.02/or_mid/be2.0/x270/gap0.3/or0.5",
+      "selector": "ts_inc_class_h250_k2_pos"
+    },
+    "S_star_asset": {
+      "DIA": 10,
+      "GLD": 30,
+      "IEF": 15,
+      "IWM": 15,
+      "QQQ": 15,
+      "SHY": 15,
+      "SLV": 15,
+      "SPY": 10,
+      "TLT": 15,
+      "USO": 15
+    },
+    "hypothesis": "one-sided H0: E[d_t] <= 0, d_t = k * r_D*(t) - r_S*(t), daily, every holdout session",
+    "tests": {
+      "primary": "Newey-West t of mean d_t, one-sided 5%",
+      "newey_west_lags": [
+        "floor(4 * (N / 100) ** (2 / 9)), N = holdout sessions at test time",
+        20
+      ],
+      "secondary": "paired stationary bootstrap of SR(D*) - SR(S*), one-sided p and 90% CI",
+      "robust_if": "same sign of mean d_t before and after 2022-03-07"
+    },
+    "placebo": "calendar lag (Cell 5), k ~ uniform{21..252} sessions per draw. A: D*'s own holdout trade sessions, each carrying the window D*'s ungated sibling selector chose k sessions earlier (never a decision made on or after the session); B: random eligible holdout sessions, same count per (asset, year), carrying those lagged windows. 2000 draws each; statistic = holdout Sharpe; p = (1 + #{placebo >= observed}) / (draws + 1)",
+    "bootstrap": {
+      "B": 2000,
+      "block": "stationary; mean length registered below",
+      "seed": 42
+    },
+    "quick": false
+  },
+  "params": {
+    "vol_match_k": 1.22648,
+    "bootstrap_block": 1.253
+  },
+  "info": {
+    "holdout_end_at_registration": "2026-09-21",
+    "nw_lag_at_registration": 8,
+    "hashes": {
+      "data": "721256828fed",
+      "engine": "c88c427d49",
+      "model": "(0.01, 0.0035, 1, 5.0, 3, (5, 10, 15, 30, 60), 390, 570, [('IWM', (('2005-06-09', 2.0),)), ('SLV', (('2008-07-24', 10.0),)), ('USO', (('2020-04-29', 0.125),))], [('DIA', 0.021), ('GLD', 0.0), ('IEF', 0.022), ('IWM', 0.013), ('QQQ', 0.008), ('SHY', 0.017), ('SLV', 0.0), ('SPY', 0.019), ('TLT', 0.03), ('USO', 0.0)], 14, 0.8, 0.8, 20, 2, 4, 0.0025, '2022-03-07', '7d2eb2016f67232cfe18658d8dcf19ef9672d89b')",
+      "rf_code": "7a6d9b1156"
+    },
+    "seam_factors": {
+      "DIA": 0.926323,
+      "GLD": 1.0,
+      "IEF": 0.877941,
+      "IWM": 0.949247,
+      "QQQ": 0.97221,
+      "SHY": 0.881254,
+      "SLV": 1.0,
+      "SPY": 0.941739,
+      "TLT": 0.857518,
+      "USO": 1.0
+    },
+    "rf": {
+      "params": {
+        "stacked": {
+          "n_estimators": 300,
+          "cap": 25000,
+          "leaf": 250
+        },
+        "multiclass": {
+          "n_estimators": 300,
+          "cap": 10000,
+          "leaf": 100
+        }
+      },
+      "gates": [
+        "always",
+        "0",
+        "q50",
+        "q75"
+      ],
+      "min_cover": 500
+    },
+    "history": [
+      "2026-10-16T13:27:01: development registration sha256 321cd354ce3ef16e\u2026 (same selection rules; written before the 2022-03-07 dividend-basis repair, with within-(asset, year) permutation placebos). Its holdout was evaluated during development: FAIL.",
+      "Afterwards the permutation placebos were replaced by calendar-lag placebos (permuting decisions within a year leaks the session's own outcome, Cell 5) and the seam was repaired (Cell 2). Every registration since was therefore written after a holdout result had been seen: the holdout is no longer blind."
+    ]
+  }
+}
